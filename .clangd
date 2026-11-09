@@ -1,0 +1,4 @@
+CompileFlags:
+  CompilationDatabase: /home/sean/workspace/udemy_esp32_sensor_demos/build
+  Remove: [-m*, -f*]
+  BuiltinHeaders: QueryDriver

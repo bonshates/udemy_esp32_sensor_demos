@@ -1,0 +1,92 @@
+menu "Example configuration"
+    config HARDWARE_TEST_ENABLED
+        bool "Run LED strip and PCF8574 hardware tests instead of the BME680 demo"
+        default y
+        help
+            Run a finite LED color sequence and PCF8574 output/readback test.
+            This drives LED data and PCF8574 P0. Connect test LEDs only, not
+            relays, motors, or other loads. Disable to restore the BME680 demo.
+
+    menu "Peripheral hardware-test settings"
+        depends on HARDWARE_TEST_ENABLED
+
+        config HARDWARE_TEST_I2C_DIAGNOSTICS_ONLY
+            bool "Only scan I2C addresses and compare pull-up configurations"
+            default n
+            help
+                Skip LED and PCF8574 output writes. Sample digital idle levels
+                and probe addresses 0x08-0x77 with internal pull-ups disabled,
+                then enabled. Internal pull-ups are only a diagnostic aid, not
+                a substitute for properly sized external pull-up resistors.
+
+        config HARDWARE_TEST_LED_TYPE
+            int "LED type: 0=WS2812, 1=SK6812, 2=APA106, 3=SM16703"
+            range 0 3
+            default 0
+
+        config HARDWARE_TEST_LED_RGBW
+            bool "Strip uses four-byte RGBW pixels"
+            default n
+
+        config HARDWARE_TEST_LED_GPIO
+            int "LED strip data GPIO"
+            range 0 33
+            default 23
+
+        config HARDWARE_TEST_LED_COUNT
+            int "Number of LEDs in the test strip"
+            range 1 64
+            default 1
+
+        config HARDWARE_TEST_LED_BRIGHTNESS
+            int "LED strip brightness (0-255)"
+            range 0 255
+            default 32
+
+        config HARDWARE_TEST_PCF8574_ADDRESS
+            hex "PCF8574 I2C address (0x20-0x27 or 0x38-0x3f)"
+            range 0x20 0x3f
+            default 0x20
+            help
+                A0-A2 grounded selects 0x20 for PCF8574 or 0x38 for PCF8574A.
+                Addresses outside those two ranges are rejected at runtime.
+
+        config HARDWARE_TEST_STEPS
+            int "Number of test steps (five colors per sequence)"
+            range 5 100
+            default 10
+
+        config HARDWARE_TEST_STEP_MS
+            int "Time per test step in milliseconds"
+            range 100 5000
+            default 1000
+    endmenu
+
+    choice EXAMPLE_I2C_ADDRESS
+        prompt "Select I2C address"
+        default EXAMPLE_I2C_ADDRESS_0
+        help
+            Select I2C address.
+
+        config EXAMPLE_I2C_ADDRESS_0
+            bool "BME680_I2C_ADDR_0 (0x76)"
+        config EXAMPLE_I2C_ADDRESS_1
+            bool "BME680_I2C_ADDR_1 (0x77)"
+    endchoice
+
+    config EXAMPLE_I2C_MASTER_SCL
+        int "SCL GPIO Number"
+        default 5 if IDF_TARGET_ESP8266
+        default 6 if IDF_TARGET_ESP32C3
+        default 19 if IDF_TARGET_ESP32 || IDF_TARGET_ESP32S2 || IDF_TARGET_ESP32S3
+        help
+            GPIO number for I2C Master clock line.
+
+    config EXAMPLE_I2C_MASTER_SDA
+        int "SDA GPIO Number"
+        default 4 if IDF_TARGET_ESP8266
+        default 5 if IDF_TARGET_ESP32C3
+        default 18 if IDF_TARGET_ESP32 || IDF_TARGET_ESP32S2 || IDF_TARGET_ESP32S3
+        help
+            GPIO number for I2C Master data line.
+endmenu
